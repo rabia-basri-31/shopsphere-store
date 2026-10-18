@@ -1,0 +1,69 @@
+{# =====================================================================
+   templates/register.html   -   CREATE A NEW CUSTOMER ACCOUNT
+   ===================================================================== #}
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="auth-wrap">
+    <div class="auth-card">
+        <h1>Create your account</h1>
+        <p class="muted">It takes less than a minute.</p>
+
+        {# ---- REGISTER FORM ---- #}
+        {# novalidate turns OFF the browser's own bubbles so that OUR
+           server messages are the ones the user sees. We still use
+           required + type=email for accessibility and mobile keyboards. #}
+        <form method="post" novalidate class="auth-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-group">
+                <label for="name">Full name</label>
+                <input type="text" id="name" name="name" value="{{ form.name }}"
+                       required autocomplete="name" placeholder="Your full name">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email address</label>
+                <input type="email" id="email" name="email" value="{{ form.email }}"
+                       required autocomplete="email" placeholder="you@example.com">
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone number <span class="muted">(optional)</span></label>
+                <input type="tel" id="phone" name="phone" value="{{ form.phone }}"
+                       autocomplete="tel" placeholder="10 digit mobile number">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="password-box">
+                    <input type="password" id="password" name="password"
+                           required autocomplete="new-password"
+                           placeholder="At least 6 characters">
+                    <button type="button" class="toggle-password"
+                            aria-label="Show password">Show</button>
+                </div>
+                {# A simple strength meter, done with pure CSS + JS #}
+                <div class="strength-meter" id="strengthMeter" aria-hidden="true">
+                    <span></span><span></span><span></span><span></span>
+                </div>
+                <small class="muted">Use at least 6 characters with letters and numbers.</small>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password">Confirm password</label>
+                <input type="password" id="confirm_password" name="confirm_password"
+                       required autocomplete="new-password" placeholder="Type it again">
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+        </form>
+
+        <p class="auth-alt">
+            Already have an account? <a href="{{ url_for('login') }}">Log in instead</a>
+        </p>
+    </div>
+</div>
+
+{% endblock %}

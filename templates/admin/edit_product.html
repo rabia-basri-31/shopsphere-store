@@ -1,0 +1,23 @@
+{# =====================================================================
+   templates/admin/edit_product.html   -   CHANGE AN EXISTING PRODUCT
+   ===================================================================== #}
+{% extends "admin/_layout.html" %}
+
+{% block admin_content %}
+
+<main class="admin-main">
+    <div class="admin-head">
+        <h1>Edit Product</h1>
+        <a href="{{ url_for('admin_products') }}" class="btn btn-ghost">&#8592; Back</a>
+    </div>
+
+    <p class="muted">
+        Editing <strong>{{ form.name }}</strong> &middot; URL slug: <code>{{ form.slug }}</code>
+    </p>
+
+    {% with submit_label = 'Update Product' %}
+        {% include "admin/_product_form.html" %}
+    {% endwith %}
+</main>
+
+{% endblock %}

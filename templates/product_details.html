@@ -1,0 +1,127 @@
+{# =====================================================================
+   templates/product_details.html   -   ONE PRODUCT, FULL DETAILS
+   ===================================================================== #}
+{% extends "base.html" %}
+{% from "macros.html" import product_card, rating_stars with context %}
+
+{% block content %}
+
+<nav class="breadcrumb">
+    <a href="{{ url_for('index') }}">Home</a> <span>/</span>
+    <a href="{{ url_for('products') }}">Products</a>
+    {% if product.category_name %}
+        <span>/</span>
+        <a href="{{ url_for('products', category=product.category_slug) }}">{{ product.category_name }}</a>
+    {% endif %}
+    <span>/</span>
+    <span class="current">{{ product.name }}</span>
+</nav>
+
+<div class="product-detail">
+
+    {# ---------------- IMAGE --------------------------------------- #}
+    {# data-zoom lets the CSS gently scale the photo on hover, and the
+       onerror handler swaps in the placeholder if the URL is dead.  #}
+    <div class="detail-image" data-animate>
+        <img src="{{ product_image_url(product.image) }}" alt="{{ product.name }}"
+             data-zoom
+             onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/placeholder.svg') }}'">
+
+        {% if product.is_featured == 1 %}
+            <span class="badge badge-accent detail-badge">Featured</span>
+        {% endif %}
+    </div>
+
+    {# ---------------- INFORMATION --------------------------------- #}
+    <div class="detail-info" data-animate>
+        {% if product.category_name %}
+            <a class="chip" href="{{ url_for('products', category=product.category_slug) }}">
+                {{ product.category_name }}
+            </a>
+        {% endif %}
+
+        <h1>{{ product.name }}</h1>
+
+        {{ rating_stars(product) }}
+
+        <p class="detail-price">{{ product.price | money }}</p>
+
+        {# Stock status #}
+        {% if product.stock == 0 %}
+            <p class="stock out">Out of stock</p>
+        {% elif product.stock <= 5 %}
+            <p class="stock low">Hurry! Only {{ product.stock }} left in stock</p>
+        {% else %}
+            <p class="stock in">&#10003; In stock ({{ product.stock }} available)</p>
+        {% endif %}
+
+        <p class="detail-desc">{{ product.description }}</p>
+
+        {# ---- Add to cart form ---- #}
+        {% if product.stock > 0 %}
+            <form action="{{ url_for('cart_add') }}" method="post" class="detail-form"
+                  data-add-form>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="product_id" value="{{ product.id }}">
+
+                <div class="quantity-box">
+                    <label for="quantity">Quantity</label>
+                    <span class="qty-stepper">
+                        <button type="button" class="qty-btn" data-step="-1"
+                                aria-label="Decrease quantity">&minus;</button>
+                        <input type="number" id="quantity" name="quantity" value="1"
+                               min="1" max="{{ product.stock }}" class="qty-input"
+                               aria-label="Quantity">
+                        <button type="button" class="qty-btn" data-step="1"
+                                aria-label="Increase quantity">+</button>
+                    </span>
+                    <span class="qty-hint">Max {{ product.stock }}</span>
+                </div>
+
+                <div class="detail-actions">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        Add to Cart
+                    </button>
+                    <button type="submit" name="buy_now" value="1"
+                            class="btn btn-accent btn-lg">Buy Now</button>
+                </div>
+            </form>
+
+            {% if not current_user %}
+                <p class="muted small">
+                    Please <a href="{{ url_for('login') }}">log in</a> to add items to your cart.
+                </p>
+            {% endif %}
+        {% else %}
+            <button class="btn btn-disabled btn-lg">Currently Unavailable</button>
+        {% endif %}
+
+        {# ---- Delivery info ---- #}
+        <ul class="info-list">
+            <li><strong>Category:</strong> {{ product.category_name or 'Uncategorised' }}</li>
+            <li><strong>Product code:</strong> #{{ product.id }}</li>
+            <li><strong>Delivery:</strong> 2 to 4 working days</li>
+            <li><strong>Payment:</strong> Cash on delivery / UPI / Card (demo)</li>
+            <li><strong>Returns:</strong> 7 days from delivery</li>
+        </ul>
+    </div>
+</div>
+
+{# ---------------- RELATED PRODUCTS ------------------------------- #}
+{% if related %}
+<section class="section">
+    <div class="section-head" data-animate>
+        <div>
+            <span class="section-eyebrow">More like this</span>
+            <h2>You May Also Like</h2>
+        </div>
+    </div>
+    <div class="product-grid">
+        {% for item in related %}
+            {{ product_card(item, loop.index) }}
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+{% endblock %}

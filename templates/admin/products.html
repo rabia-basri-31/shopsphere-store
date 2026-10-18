@@ -1,0 +1,121 @@
+{# =====================================================================
+   templates/admin/products.html   -   MANAGE ALL PRODUCTS
+   Search box + table with Edit and Delete buttons.
+   ===================================================================== #}
+{% extends "admin/_layout.html" %}
+
+{% block admin_content %}
+
+<main class="admin-main">
+    <div class="admin-head">
+        <h1>Manage Products</h1>
+        <a href="{{ url_for('admin_add_product') }}" class="btn btn-primary">&#10133; Add Product</a>
+    </div>
+
+    {# ---- Search products ---- #}
+    <form method="get" action="{{ url_for('admin_products') }}" class="admin-search">
+        <input type="search" name="q" value="{{ search_text }}"
+               placeholder="Search by product name...">
+        <button type="submit" class="btn btn-outline">Search</button>
+        {% if search_text %}
+            <a href="{{ url_for('admin_products') }}" class="btn btn-ghost">Clear</a>
+        {% endif %}
+    </form>
+
+    <section class="panel">
+        {% if products %}
+            <div class="table-scroll">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Featured</th>
+                            <th>Visible</th>
+                            <th class="right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                            <tr>
+                                <td class="muted">{{ product.id }}</td>
+
+                                <td>
+                                    <div class="table-product">
+                                        <img src="{{ product_image_url(product.image) }}"
+                                             alt="{{ product.name }}">
+                                        <div>
+                                            <strong>{{ product.name }}</strong>
+                                            <span class="muted small">/{{ product.slug }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td>{{ product.category_name or '-' }}</td>
+                                <td>{{ product.price | money }}</td>
+
+                                <td>
+                                    <span class="badge {% if product.stock == 0 %}badge-out{% elif product.stock <= 5 %}badge-low{% else %}badge-delivered{% endif %}">
+                                        {{ product.stock }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    {% if product.is_featured == 1 %}
+                                        <span class="badge badge-paid">Yes</span>
+                                    {% else %}
+                                        <span class="muted">-</span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if product.is_active == 1 %}
+                                        <span class="badge badge-delivered">Yes</span>
+                                    {% else %}
+                                        <span class="badge badge-cancelled">Hidden</span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="right nowrap">
+                                    {# ---- View on the shop ---- #}
+                                    {% if product.is_active == 1 %}
+                                        <a class="btn btn-sm btn-ghost"
+                                           href="{{ url_for('product_details', slug=product.slug) }}"
+                                           title="View on shop">View</a>
+                                    {% endif %}
+
+                                    {# ---- Edit ---- #}
+                                    <a class="btn btn-sm btn-outline"
+                                       href="{{ url_for('admin_edit_product', product_id=product.id) }}">
+                                        Edit
+                                    </a>
+
+                                    {# ---- Delete (needs a POST so it can never be
+                                          triggered by a link or a crawler) ---- #}
+                                    <form action="{{ url_for('admin_delete_product', product_id=product.id) }}"
+                                          method="post" class="inline-form"
+                                          data-confirm="Delete '{{ product.name }}'? If it was already ordered it will only be hidden.">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">&#128230;</div>
+                <h3>No products found</h3>
+                <p>{% if search_text %}Nothing matched "{{ search_text }}".{% else %}Add your first product to get started.{% endif %}</p>
+                <a href="{{ url_for('admin_add_product') }}" class="btn btn-primary">Add Product</a>
+            </div>
+        {% endif %}
+    </section>
+</main>
+
+{% endblock %}

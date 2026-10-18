@@ -1,0 +1,20 @@
+{# =====================================================================
+   templates/admin/add_product.html   -   CREATE A NEW PRODUCT
+   ===================================================================== #}
+{% extends "admin/_layout.html" %}
+
+{% block admin_content %}
+
+<main class="admin-main">
+    <div class="admin-head">
+        <h1>Add New Product</h1>
+        <a href="{{ url_for('admin_products') }}" class="btn btn-ghost">&#8592; Back</a>
+    </div>
+
+    {# 'submit_label' is the only thing different from the edit page. #}
+    {% with submit_label = 'Save Product' %}
+        {% include "admin/_product_form.html" %}
+    {% endwith %}
+</main>
+
+{% endblock %}

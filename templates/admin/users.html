@@ -1,0 +1,67 @@
+{# =====================================================================
+   templates/admin/users.html   -   SEE ALL REGISTERED USERS
+   ===================================================================== #}
+{% extends "admin/_layout.html" %}
+
+{% block admin_content %}
+
+<main class="admin-main">
+    <div class="admin-head">
+        <h1>Users</h1>
+        <span class="muted">{{ users|length }} registered</span>
+    </div>
+
+    <section class="panel">
+        <div class="table-scroll">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Role</th>
+                        <th>Orders</th>
+                        <th>Total spent</th>
+                        <th>Joined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td class="muted">{{ user.id }}</td>
+                            <td>
+                                <div class="user-cell">
+                                    <span class="avatar">{{ user.name[0]|upper }}</span>
+                                    <strong>{{ user.name }}</strong>
+                                </div>
+                            </td>
+                            <td class="small">{{ user.email }}</td>
+                            <td class="small">{{ user.phone or '-' }}</td>
+                            <td>
+                                {% if user.is_admin == 1 %}
+                                    <span class="badge badge-packed">Admin</span>
+                                {% else %}
+                                    <span class="badge">Customer</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ user.order_count }}</td>
+                            <td>{{ user.spent | money }}</td>
+                            <td class="muted small">
+                                {{ user.created_at.strftime('%d %b %Y') }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {# Small privacy reminder - a good habit even in a portfolio app. #}
+        <p class="muted small pad">
+            Passwords are never displayed anywhere in the admin panel. Only their
+            hashed form is ever stored in the database.
+        </p>
+    </section>
+</main>
+
+{% endblock %}

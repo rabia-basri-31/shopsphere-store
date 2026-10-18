@@ -1,0 +1,20 @@
+{# =====================================================================
+   templates/errors/400.html   -   BAD REQUEST
+   Most often this is a failed CSRF check (an old / expired form).
+   ===================================================================== #}
+{% extends "base.html" %}
+
+{% block content %}
+<div class="error-page">
+    <div class="error-code">400</div>
+    <h1>Bad request</h1>
+    <p class="muted">
+        {{ message|default('The form you submitted could not be accepted.') }}
+    </p>
+
+    <div class="error-actions">
+        <a href="{{ url_for('index') }}" class="btn btn-primary">Go to Home</a>
+        <a href="{{ url_for('products') }}" class="btn btn-ghost">Browse Products</a>
+    </div>
+</div>
+{% endblock %}

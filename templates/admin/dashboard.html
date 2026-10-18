@@ -1,0 +1,165 @@
+{# =====================================================================
+   templates/admin/dashboard.html   -   ADMIN HOME
+   Big number cards + recent orders + low stock warnings.
+   ===================================================================== #}
+{% extends "admin/_layout.html" %}
+{% from "macros.html" import status_badge with context %}
+
+{% block admin_content %}
+
+<main class="admin-main">
+    <div class="admin-head">
+        <h1>Dashboard</h1>
+        <p class="muted">Welcome back, {{ current_user.name }}. Here is today's summary.</p>
+    </div>
+
+    {# ---------------- STAT CARDS ---------------------------------- #}
+    <div class="stat-grid">
+        <div class="stat-card">
+            <span class="stat-icon">&#128101;</span>
+            <div>
+                <span class="stat-label">Customers</span>
+                <strong class="stat-value">{{ stats.customers }}</strong>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <span class="stat-icon">&#128230;</span>
+            <div>
+                <span class="stat-label">Products</span>
+                <strong class="stat-value">{{ stats.products }}</strong>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <span class="stat-icon">&#128230;</span>
+            <div>
+                <span class="stat-label">Orders</span>
+                <strong class="stat-value">{{ stats.orders }}</strong>
+            </div>
+        </div>
+
+        <div class="stat-card warning">
+            <span class="stat-icon">&#9888;</span>
+            <div>
+                <span class="stat-label">Pending orders</span>
+                <strong class="stat-value">{{ stats.pending_orders }}</strong>
+            </div>
+        </div>
+
+        <div class="stat-card success">
+            <span class="stat-icon">&#128176;</span>
+            <div>
+                <span class="stat-label">Total revenue</span>
+                <strong class="stat-value">{{ stats.revenue | money }}</strong>
+            </div>
+        </div>
+    </div>
+
+    {# ---------------- QUICK ACTIONS ------------------------------- #}
+    <div class="quick-actions">
+        <a href="{{ url_for('admin_add_product') }}" class="btn btn-primary">&#10133; Add New Product</a>
+        <a href="{{ url_for('admin_orders', status='Pending') }}" class="btn btn-outline">
+            View Pending Orders
+        </a>
+        <a href="{{ url_for('admin_products') }}" class="btn btn-outline">Manage Products</a>
+    </div>
+
+    <div class="admin-columns">
+
+        {# ---------------- RECENT ORDERS ---------------------------- #}
+        <section class="panel">
+            <div class="panel-head">
+                <h2>Recent Orders</h2>
+                <a href="{{ url_for('admin_orders') }}" class="link-more">See all &rarr;</a>
+            </div>
+
+            {% if recent_orders %}
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Order</th>
+                            <th>Customer</th>
+                            <th>Date</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in recent_orders %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('admin_order_details', order_id=order.id) }}"
+                                       class="order-code">{{ order.order_code }}</a>
+                                </td>
+                                <td>{{ order.user_name }}</td>
+                                <td class="muted">
+                                    {{ order.created_at.strftime('%d %b, %I:%M %p') }}
+                                </td>
+                                <td>{{ order.total_amount | money }}</td>
+                                <td>{{ status_badge(order.status) }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="muted pad">No orders yet.</p>
+            {% endif %}
+        </section>
+
+        <div class="admin-side-col">
+
+            {# ---------------- LOW STOCK ---------------------------- #}
+            <section class="panel">
+                <div class="panel-head"><h2>Low Stock Alert</h2></div>
+
+                {% if low_stock %}
+                    <table class="data-table compact">
+                        <thead><tr><th>Product</th><th>Stock</th></tr></thead>
+                        <tbody>
+                            {% for product in low_stock %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('product_details', slug=product.slug) }}"
+                                           class="link">{{ product.name }}</a>
+                                    </td>
+                                    <td>
+                                        <span class="badge {% if product.stock == 0 %}badge-out{% else %}badge-low{% endif %}">
+                                            {{ product.stock }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="muted pad">Every product has healthy stock.</p>
+                {% endif %}
+            </section>
+
+            {# ---------------- BEST SELLERS -------------------------- #}
+            <section class="panel">
+                <div class="panel-head"><h2>Best Sellers</h2></div>
+
+                {% if top_products %}
+                    <ol class="rank-list">
+                        {% for product in top_products %}
+                            <li>
+                                <span class="rank">{{ loop.index }}</span>
+                                <span class="rank-name">
+                                    <a href="{{ url_for('product_details', slug=product.slug) }}"
+                                       class="link">{{ product.name }}</a>
+                                </span>
+                                <strong>{{ product.sold }} sold</strong>
+                            </li>
+                        {% endfor %}
+                    </ol>
+                {% else %}
+                    <p class="muted pad">No sales recorded yet.</p>
+                {% endif %}
+            </section>
+        </div>
+    </div>
+</main>
+
+{% endblock %}

@@ -1,0 +1,31 @@
+# ---------------------------------------------------------------------
+# .gitignore  ->  tells Git which files to NEVER upload to GitHub.
+# ---------------------------------------------------------------------
+
+# Real secrets (database password, secret key)
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Flask
+instance/
+
+# Product images uploaded through the admin panel
+static/images/uploads/*
+!static/images/uploads/.gitkeep
+
+# Logs
+*.log
+logs/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

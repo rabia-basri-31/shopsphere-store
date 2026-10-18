@@ -1,0 +1,28 @@
+# ---------------------------------------------------------------------
+# .gitattributes
+# Keeps line endings identical for everyone, so a file edited on
+# Windows does not show the whole file as "changed" on macOS/Linux.
+# ---------------------------------------------------------------------
+
+# Text files: store with LF in the repository
+* text=auto eol=lf
+
+*.py    text diff=python
+*.html  text diff=html
+*.css   text diff=css
+*.js    text diff=javascript
+*.sql   text
+*.md    text
+
+# Windows scripts need CRLF to run correctly
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
+
+# Binary files - never change these
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.ico   binary
+*.svg   text

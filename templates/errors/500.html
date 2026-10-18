@@ -1,0 +1,26 @@
+{# =====================================================================
+   templates/errors/500.html   -   SOMETHING WENT WRONG ON THE SERVER
+   Used for 500 (our bug) and 503 (database not reachable).
+   ===================================================================== #}
+{% extends "base.html" %}
+
+{% block content %}
+<div class="error-page">
+    <div class="error-code">
+        {% if page_title == 'Service unavailable' %}503{% else %}500{% endif %}
+    </div>
+    <h1>Something went wrong</h1>
+    <p class="muted">
+        {{ message|default('An unexpected error happened. Please try again.') }}
+    </p>
+
+    <div class="error-actions">
+        <a href="{{ url_for('index') }}" class="btn btn-primary">Go to Home</a>
+        <a href="{{ url_for('products') }}" class="btn btn-ghost">Browse Products</a>
+    </div>
+
+    <p class="muted small">
+        The problem has been written to <code>logs/error.log</code>.
+    </p>
+</div>
+{% endblock %}

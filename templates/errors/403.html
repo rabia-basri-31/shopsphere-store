@@ -1,0 +1,26 @@
+{# =====================================================================
+   templates/errors/403.html   -   NOT ALLOWED
+   Shown when a normal customer tries to open an admin page.
+   ===================================================================== #}
+{% extends "base.html" %}
+
+{% block content %}
+<div class="error-page">
+    <div class="error-code">403</div>
+    <h1>Access denied</h1>
+    <p class="muted">
+        {{ message|default('You do not have permission to view this page.') }}
+    </p>
+
+    <div class="error-actions">
+        <a href="{{ url_for('index') }}" class="btn btn-primary">Go to Home</a>
+        {% if not current_user %}
+            <a href="{{ url_for('login') }}" class="btn btn-ghost">Log in</a>
+        {% endif %}
+    </div>
+
+    <p class="muted small">
+        Admin pages can only be opened by an account with administrator access.
+    </p>
+</div>
+{% endblock %}

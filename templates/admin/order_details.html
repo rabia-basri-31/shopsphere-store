@@ -1,0 +1,113 @@
+{# =====================================================================
+   templates/admin/order_details.html
+   One order + a form to change its status.
+   ===================================================================== #}
+{% extends "admin/_layout.html" %}
+{% from "macros.html" import status_badge with context %}
+
+{% block admin_content %}
+
+<main class="admin-main">
+    <div class="admin-head">
+        <h1>Order {{ order.order_code }}</h1>
+        <a href="{{ url_for('admin_orders') }}" class="btn btn-ghost">&#8592; All orders</a>
+    </div>
+
+    {# ---------------- CHANGE STATUS FORM -------------------------- #}
+    <section class="panel status-panel">
+        <div>
+            <span class="muted small">Current status</span>
+            <div>{{ status_badge(order.status) }}</div>
+        </div>
+
+        <form action="{{ url_for('admin_update_order_status') }}" method="post"
+              class="status-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="order_id" value="{{ order.id }}">
+
+            <select name="status" class="select-inline">
+                {% for status in status_options %}
+                    <option value="{{ status }}" {% if status == order.status %}selected{% endif %}>
+                        {{ status }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <button type="submit" class="btn btn-primary">Update Status</button>
+        </form>
+    </section>
+
+    <div class="admin-columns">
+
+        {# ---------------- ITEMS ------------------------------------ #}
+        <section class="panel">
+            <h2>Items</h2>
+
+            <table class="data-table">
+                <thead>
+                    <tr><th>Product</th><th>Price</th><th>Qty</th><th class="right">Total</th></tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                        <tr>
+                            <td>
+                                <div class="table-product">
+                                    {% if item.slug %}
+                                        <img src="{{ product_image_url(item.image) }}"
+                                             alt="{{ item.product_name }}">
+                                    {% endif %}
+                                    <div>
+                                        <strong>{{ item.product_name }}</strong>
+                                        <span class="muted small">
+                                            Product #{{ item.product_id or 'removed' }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ item.price | money }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td class="right">{{ (item.price * item.quantity) | money }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="right">Total Amount</td>
+                        <td class="right"><strong>{{ order.total_amount | money }}</strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </section>
+
+        {# ---------------- CUSTOMER + DELIVERY --------------------- #}
+        <div class="admin-side-col">
+            <section class="panel">
+                <h3>Customer</h3>
+                <p class="address-block">
+                    <strong>{{ order.customer_name }}</strong><br>
+                    {{ order.email }}<br>
+                    {{ order.phone }}
+                </p>
+            </section>
+
+            <section class="panel">
+                <h3>Delivery Address</h3>
+                <p class="address-block">
+                    {{ order.address }}<br>
+                    {{ order.city }}, {{ order.state }}<br>
+                    PIN: {{ order.pincode }}
+                </p>
+            </section>
+
+            <section class="panel">
+                <h3>Payment</h3>
+                <p>{{ order.payment_method }}</p>
+                <p class="muted small">
+                    Placed {{ order.created_at.strftime('%d %b %Y at %I:%M %p') }}
+                </p>
+            </section>
+        </div>
+    </div>
+</main>
+
+{% endblock %}

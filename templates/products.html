@@ -1,0 +1,166 @@
+{# =====================================================================
+   templates/products.html   -   PRODUCT LISTING + SEARCH + FILTERS
+   ===================================================================== #}
+{% extends "base.html" %}
+{% from "macros.html" import product_card, empty_state, pagination with context %}
+
+{% block content %}
+
+{# =====================================================================
+     QUICK FILTER BAR  -  instant, client side, no page reload
+     =====================================================================
+     This is an ADDITION, not a replacement. The server-side filter form
+     in the sidebar below is still the real filter and still works with
+     JavaScript switched off. Everything here hangs off #quickFilter so
+     script.js can find it; if the script fails to load, this bar simply
+     stops filtering and the page carries on working as before.
+     ===================================================================== #}
+<div class="filter-bar">
+    <div class="filter-search">
+        <span class="search-icon" aria-hidden="true">&#128269;</span>
+        <label class="sr-only" for="quickSearch">Search products on this page</label>
+        <input type="search" id="quickSearch"
+               placeholder="Search these results instantly..." value="{{ search_text }}">
+    </div>
+
+    <label class="sr-only" for="quickCategory">Filter by category</label>
+    <select id="quickCategory">
+        <option value="">All categories</option>
+        {% for category in categories %}
+            <option value="{{ category.slug }}"
+                {% if active_category == category.slug %}selected{% endif %}>
+                {{ category.name }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <label class="sr-only" for="quickSort">Sort products</label>
+    <select id="quickSort">
+        <option value="newest">Newest first</option>
+        <option value="price_low">Price: low to high</option>
+        <option value="price_high">Price: high to low</option>
+        <option value="name">Name: A to Z</option>
+    </select>
+
+    <button type="button" id="quickClear" class="btn btn-ghost btn-sm">Clear</button>
+
+    <span class="filter-count" id="quickCount"></span>
+</div>
+
+<div class="page-head">
+    <div>
+        <h1>{% if active_category %}{{ active_category|replace('-', ' ')|title }}{% elif search_text %}Search results{% else %}All Products{% endif %}</h1>
+        <p class="muted">
+            {{ total_items }} product{{ '' if total_items == 1 else 's' }} found
+            {% if search_text %} for &ldquo;{{ search_text }}&rdquo;{% endif %}
+        </p>
+    </div>
+
+    {# Sort dropdown - a plain GET form, so filters are kept #}
+    <form method="get" action="{{ url_for('products') }}" class="sort-form">
+        {% if search_text %}<input type="hidden" name="q" value="{{ search_text }}">{% endif %}
+        {% if active_category %}<input type="hidden" name="category" value="{{ active_category }}">{% endif %}
+        <label for="sort">Sort by</label>
+        <select name="sort" id="sort" onchange="this.form.submit()">
+            <option value="newest"    {% if sort_option == 'newest' %}selected{% endif %}>Newest first</option>
+            <option value="price_low" {% if sort_option == 'price_low' %}selected{% endif %}>Price: low to high</option>
+            <option value="price_high"{% if sort_option == 'price_high' %}selected{% endif %}>Price: high to low</option>
+            <option value="name"      {% if sort_option == 'name' %}selected{% endif %}>Name: A to Z</option>
+        </select>
+        <noscript><button type="submit" class="btn btn-sm">Go</button></noscript>
+    </form>
+</div>
+
+<div class="shop-layout">
+
+    {# ---------------- LEFT: FILTER SIDEBAR ------------------------ #}
+    <aside class="sidebar">
+        <form method="get" action="{{ url_for('products') }}" class="filter-form">
+
+            {# Keep the category when we search, and vice versa. #}
+            {% if active_category %}<input type="hidden" name="category" value="{{ active_category }}">{% endif %}
+            {% if sort_option and sort_option != 'newest' %}<input type="hidden" name="sort" value="{{ sort_option }}">{% endif %}
+
+            <h2>Filters</h2>
+
+            {# --- Keyword --- #}
+            <div class="filter-group">
+                <label for="q">Search</label>
+                <input type="search" name="q" id="q" value="{{ search_text }}"
+                       placeholder="Product name">
+            </div>
+
+            {# --- Category --- #}
+            <div class="filter-group">
+                <label for="category">Category</label>
+                <select name="category" id="category">
+                    <option value="">All categories</option>
+                    {% for category in categories %}
+                        <option value="{{ category.slug }}"
+                            {% if active_category == category.slug %}selected{% endif %}>
+                            {{ category.name }} ({{ category.product_count }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            {# --- Price --- #}
+            <div class="filter-group">
+                <label>Price range</label>
+                <div class="price-row">
+                    <input type="number" name="min_price" min="0" step="1"
+                           value="{{ min_price }}" placeholder="Min">
+                    <span>to</span>
+                    <input type="number" name="max_price" min="0" step="1"
+                           value="{{ max_price }}" placeholder="Max">
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Apply Filters</button>
+            <a href="{{ url_for('products') }}" class="btn btn-ghost btn-block">Clear All</a>
+        </form>
+    </aside>
+
+    {# ---------------- RIGHT: PRODUCT GRID ------------------------- #}
+    <section class="shop-results">
+        {% if products %}
+            <div class="product-grid" id="quickFilter">
+                {% for product in products %}
+                    {{ product_card(product, loop.index) }}
+                {% endfor %}
+            </div>
+
+            {# Revealed by the instant filter when nothing matches.
+               The second link is important: the quick bar only filters
+               THIS page, so it must offer a real search of the whole
+               catalogue (which the server handles). #}
+            <div class="empty-filter" id="quickEmpty">
+                <div class="empty-icon">&#128269;</div>
+                <h3>No matches on this page</h3>
+                <p>The quick filter only looks at the products currently shown.
+                   Use the button below to search the entire catalogue, or the
+                   Filters panel on the left.</p>
+                <div class="empty-filter-actions">
+                    <button type="button" class="btn btn-primary" id="quickClearEmpty">
+                        Clear the search
+                    </button>
+                    <a href="{{ url_for('products') }}" class="btn btn-outline"
+                       id="quickSearchAll">Search all products</a>
+                </div>
+            </div>
+
+            {{ pagination(page, total_pages, 'products',
+                          {'q': search_text, 'category': active_category,
+                           'sort': sort_option, 'min_price': min_price,
+                           'max_price': max_price}) }}
+        {% else %}
+            {{ empty_state(
+                'No products found',
+                'Try a different keyword, widen the price range, or clear the filters.',
+                'Clear Filters',
+                url_for('products')) }}
+        {% endif %}
+    </section>
+</div>
+
+{% endblock %}

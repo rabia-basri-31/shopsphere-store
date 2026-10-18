@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="450" viewBox="0 0 600 450">
+    <!--
+        placeholder.svg
+        ----------------
+        Shown whenever a product has no real photo yet.
+        app.py builds the URL with product_image_url(), which falls back
+        to this file automatically, so you never see a broken image.
+    -->
+    <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%"   stop-color="#eef2ff"/>
+            <stop offset="100%" stop-color="#e0e7ff"/>
+        </linearGradient>
+    </defs>
+
+    <rect width="600" height="450" fill="url(#bg)"/>
+
+    <!-- simple shopping bag drawing -->
+    <g transform="translate(300 215)" fill="none" stroke="#6366f1"
+       stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M-85 -45 h170 l-18 130 h-134 z"/>
+        <path d="M-40 -45 v-25 a40 40 0 0 1 80 0 v25"/>
+    </g>
+
+    <text x="300" y="365" font-family="Segoe UI, Arial, sans-serif" font-size="26"
+          fill="#4f46e5" text-anchor="middle" font-weight="600">
+        No product image
+    </text>
+    <text x="300" y="398" font-family="Segoe UI, Arial, sans-serif" font-size="16"
+          fill="#818cf8" text-anchor="middle">
+        Upload one from the admin panel
+    </text>
+</svg>

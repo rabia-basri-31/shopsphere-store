@@ -1,0 +1,91 @@
+# =====================================================================
+# render.yaml - one-click deployment to Render
+# =====================================================================
+# WHAT THIS DOES
+#   Tells Render how to build and run the app, and how to create the
+#   MySQL database. You can review every setting on the Render dashboard
+#   before you click "Apply".
+#
+# HOW TO USE IT
+#   1. Push this file to GitHub (it is already in the repo)
+#   2. Go to https://render.com and choose "New +" > "Blueprint"
+#   3. Pick this repository and click "Apply"
+#   4. Render builds the app and gives you a public URL
+#
+# IMPORTANT
+#   Render's free MySQL plan EXPIRES after 30 days. For a permanent
+#   demo keep using your own database and point DB_HOST at it, or
+#   upgrade. This is fine for showing a recruiter and deleting after.
+# =====================================================================
+
+services:
+  - type: web
+    name: ecommerce-web-app
+    runtime: python
+    plan: free
+    region: singapore          # change to 'oregon' or 'frankfurt' if closer
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    healthCheckPath: /
+
+    # Render sets this automatically for us.
+    # It tells Flask it is behind a proxy, so it generates correct
+    # http:// URLs instead of https:// and redirects safely.
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.10
+
+      - key: SECRET_KEY
+        generateValue: true        # Render generates a random key for us
+
+      - key: FLASK_DEBUG
+        value: "false"             # never leave debug on in production
+
+      # --- MySQL: filled in automatically once the database exists ---
+      - key: DB_HOST
+        fromDatabase:
+          name: ecommerce-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: ecommerce-db
+          property: port
+      - key: DB_USER
+        fromDatabase:
+          name: ecommerce-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: ecommerce-db
+          property: password
+
+      - key: DB_NAME
+        value: ecommerce_db
+
+      - key: SITE_NAME
+        value: ShopSphere
+
+      - key: SITE_TAGLINE
+        value: Everyday essentials, delivered
+
+    databases:
+      - name: ecommerce-db
+        plan: free
+        databaseName: ecommerce_db
+        user: ecommerce_user
+
+# =====================================================================
+# IF YOU WANT TO USE YOUR OWN MYSQL SERVER INSTEAD
+# ---------------------------------------------------------------------
+# Delete the "databases" block above and replace the four DB env vars
+# with plain values pointing at your own server, for example:
+#
+#   - key: DB_HOST
+#     value: your-mysql-host
+#   - key: DB_PORT
+#     value: "3306"
+#   - key: DB_USER
+#     value: ecommerce_user
+#   - key: DB_PASSWORD
+#     value: your-password
+# =====================================================================

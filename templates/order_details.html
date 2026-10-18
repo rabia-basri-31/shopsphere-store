@@ -1,0 +1,125 @@
+{# =====================================================================
+   templates/order_details.html
+   Used for TWO things:
+     1. the "Thank you" page right after checkout
+     2. the normal "view this order" page later
+   The only difference is the heading, decided by is_confirmation.
+   ===================================================================== #}
+{% extends "base.html" %}
+{% from "macros.html" import status_badge with context %}
+
+{% block content %}
+
+{% if is_confirmation %}
+    <div class="success-banner">
+        <div class="success-icon">&#10003;</div>
+        <h1>Thank you, your order is placed!</h1>
+        <p>We have saved your order. You will get an email at
+           <strong>{{ order.email }}</strong> once it ships.</p>
+    </div>
+{% else %}
+    <nav class="breadcrumb">
+        <a href="{{ url_for('index') }}">Home</a> <span>/</span>
+        <a href="{{ url_for('orders') }}">My Orders</a> <span>/</span>
+        <span class="current">{{ order.order_code }}</span>
+    </nav>
+{% endif %}
+
+<div class="page-head">
+    <div>
+        <h1>Order {{ order.order_code }}</h1>
+        <p class="muted">
+            Placed on {{ order.created_at.strftime('%d %b %Y at %I:%M %p') }}
+            &middot; {{ status_badge(order.status) }}
+        </p>
+    </div>
+    <div class="page-head-actions">
+        <a href="{{ url_for('orders') }}" class="btn btn-ghost">&larr; All Orders</a>
+        <button class="btn btn-outline" onclick="window.print()">Print Invoice</button>
+    </div>
+</div>
+
+<div class="order-detail-layout">
+
+    {# ---------------- ITEMS TABLE -------------------------------- #}
+    <section class="panel">
+        <h2>Items in this order</h2>
+
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Qty</th>
+                    <th class="right">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                    <tr>
+                        <td>
+                            <div class="table-product">
+                                {% if item.slug %}
+                                    <img src="{{ product_image_url(item.image) }}"
+                                         alt="{{ item.product_name }}">
+                                {% endif %}
+                                <div>
+                                    {% if item.slug %}
+                                        <a href="{{ url_for('product_details', slug=item.slug) }}"
+                                           class="cart-name">{{ item.product_name }}</a>
+                                    {% else %}
+                                        <span class="cart-name">{{ item.product_name }}</span>
+                                    {% endif %}
+                                    <span class="muted small">
+                                        Product #{{ item.product_id or 'removed' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ item.price | money }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td class="right"><strong>{{ (item.price * item.quantity) | money }}</strong></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3" class="right">Amount Payable</td>
+                    <td class="right"><strong>{{ order.total_amount | money }}</strong></td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <p class="muted small">
+            This is a demo invoice. No real payment was taken.
+        </p>
+    </section>
+
+    {# ---------------- DELIVERY DETAILS --------------------------- #}
+    <aside class="order-side">
+        <div class="panel">
+            <h3>Delivery Address</h3>
+            <p class="address-block">
+                <strong>{{ order.customer_name }}</strong><br>
+                {{ order.address }}<br>
+                {{ order.city }}, {{ order.state }} - {{ order.pincode }}<br>
+                Phone: {{ order.phone }}<br>
+                Email: {{ order.email }}
+            </p>
+        </div>
+
+        <div class="panel">
+            <h3>Payment</h3>
+            <p>{{ order.payment_method }}</p>
+            <p class="badge badge-pending">Status: {{ order.status }}</p>
+        </div>
+
+        <div class="panel">
+            <h3>Order Number</h3>
+            <p class="order-code big">{{ order.order_code }}</p>
+            <p class="muted small">Quote this number if you contact support.</p>
+        </div>
+    </aside>
+</div>
+
+{% endblock %}

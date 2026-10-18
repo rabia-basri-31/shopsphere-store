@@ -1,0 +1,147 @@
+{# =====================================================================
+   templates/contact.html   -   STATIC "CONTACT US" PAGE
+
+   NOTE FOR THE INTERVIEW: this form is a DEMO. It deliberately has no
+   POST route and no database table - nothing is stored and nothing is
+   emailed. That is on purpose, so the project never needs an email
+   server or collects real contact details.
+   ===================================================================== #}
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="page-hero" data-animate>
+    <div class="container">
+        <span class="section-eyebrow">Contact</span>
+        <h1>We are here to help</h1>
+        <p class="muted">
+            Questions about an order, a return or a product? Reach us however
+            suits you best.
+        </p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container contact-grid">
+
+        {# ---- Contact details ---- #}
+        <aside class="panel" data-animate>
+            <h2>Get in touch</h2>
+
+            <ul class="contact-list">
+                <li>
+                    <span class="contact-icon" aria-hidden="true">&#128205;</span>
+                    <div>
+                        <strong>Visit the store</strong>
+                        <span>221B, Brigade Road<br>Bengaluru 560001, India</span>
+                    </div>
+                </li>
+                <li>
+                    <span class="contact-icon" aria-hidden="true">&#128222;</span>
+                    <div>
+                        <strong>Email us</strong>
+                        <span>support@{{ site_name|lower }}.com<br>Replies within one working day</span>
+                    </div>
+                </li>
+                <li>
+                    <span class="contact-icon" aria-hidden="true">&#128241;</span>
+                    <div>
+                        <strong>Call us</strong>
+                        <span>+91 90000 00000<br>Monday to Saturday, 10 AM - 7 PM</span>
+                    </div>
+                </li>
+            </ul>
+
+            <div class="contact-note">
+                <strong>Order support is faster with your order ID</strong>
+                <p>Your order ID looks like <code>ORD-260107-4F7A</code> and is
+                   shown on every order page.</p>
+            </div>
+        </aside>
+
+        {# ---- Demo form ---- #}
+        <section class="panel" data-animate>
+            <h2>Send us a message</h2>
+
+            <form class="auth-form" novalidate
+                  onsubmit="event.preventDefault();showToast('Thanks! This is a demo form, so nothing was actually sent.','success');">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cName">Your name *</label>
+                        <input type="text" id="cName" required maxlength="100"
+                               placeholder="Full name" autocomplete="name">
+                    </div>
+                    <div class="form-group">
+                        <label for="cEmail">Email address *</label>
+                        <input type="email" id="cEmail" required maxlength="150"
+                               placeholder="you@example.com" autocomplete="email">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="cSubject">What is this about?</label>
+                    <select id="cSubject">
+                        <option>An existing order</option>
+                        <option>A return or exchange</option>
+                        <option>A product question</option>
+                        <option>Something else</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="cMessage">Message *</label>
+                    <textarea id="cMessage" rows="5" required minlength="10"
+                              maxlength="1000"
+                              placeholder="Tell us what you need help with"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg">Send Message</button>
+
+                <p class="muted small">
+                    This is a demonstration form for a portfolio project. Nothing
+                    you type is stored or sent anywhere.
+                </p>
+            </form>
+        </section>
+    </div>
+</section>
+
+{# ---- FAQ ---- #}
+<section class="section section-alt">
+    <div class="container faq-wrap">
+        <div class="section-head section-head-center" data-animate>
+            <div>
+                <span class="section-eyebrow">FAQ</span>
+                <h2>Questions we get a lot</h2>
+            </div>
+        </div>
+
+        <div class="faq-grid">
+            <details class="faq-item" data-animate>
+                <summary>Can I pay when the order arrives?</summary>
+                <p>Yes. Cash on delivery is available on every order, alongside
+                   the demo UPI and card options.</p>
+            </details>
+
+            <details class="faq-item" data-animate style="--delay: 60ms">
+                <summary>How long does delivery take?</summary>
+                <p>Usually 2 to 4 working days. You can follow the status on the
+                   My Orders page, from Pending through to Delivered.</p>
+            </details>
+
+            <details class="faq-item" data-animate style="--delay: 120ms">
+                <summary>What is your returns policy?</summary>
+                <p>Send anything back within 7 days of delivery in its original
+                   condition, and we will refund it.</p>
+            </details>
+
+            <details class="faq-item" data-animate style="--delay: 180ms">
+                <summary>Is my payment information safe?</summary>
+                <p>This demo store never asks for or stores card details at all,
+                   which is why checkout only collects a delivery address.</p>
+            </details>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

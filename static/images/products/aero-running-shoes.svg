@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800"
+     height="600" viewBox="0 0 800 600"
+     role="img" aria-label="Aero Running Shoes illustration">
+  <title>Aero Running Shoes</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#fb7185"/>
+      <stop offset="100%" stop-color="#be123c"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg)"/>
+  <circle cx="655" cy="118" r="168" fill="#ffffff" opacity="0.09"/>
+  <circle cx="132" cy="512" r="132" fill="#ffffff" opacity="0.07"/>
+  <circle cx="400" cy="300" r="196" fill="#ffffff" opacity="0.10"/>
+  <g transform="translate(400 300)">
+    <g stroke="#ffffff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <path d="M-136 68 v-40 c0 -12 10 -22 22 -22 l52 6 l46 -52
+               c8 -9 20 -12 31 -8 l58 22 c26 10 43 30 43 56 v38
+               a10 10 0 0 1 -10 10 h-232 a10 10 0 0 1 -10 -10 z"/>
+      <path d="M-136 38 h252"/>
+      <path d="M-34 12 l30 -34 M4 22 l30 -34" opacity="0.65"/>
+    </g>
+  </g>
+</svg>

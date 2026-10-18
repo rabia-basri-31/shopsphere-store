@@ -1,0 +1,108 @@
+{# =====================================================================
+   templates/about.html   -   STATIC "ABOUT US" PAGE
+   The numbers come straight from the database, so this page can never
+   show something different from the real shop.
+   ===================================================================== #}
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="page-hero" data-animate>
+    <div class="container">
+        <span class="section-eyebrow">About us</span>
+        <h1>A shop built around how people actually buy</h1>
+        <p class="muted">
+            {{ site_name }} is a working demonstration of a complete
+            e-commerce application - built from scratch with Flask, MySQL and
+            plain HTML, CSS and JavaScript.
+        </p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container about-grid">
+
+        <div data-animate>
+            <h2>What this project is</h2>
+            <p>
+                This is a portfolio project, not a real shop. Nothing is
+                charged and no order is ever shipped. Its purpose is to show
+                how a full online store is put together: a database designed
+                properly, pages that work without JavaScript, and security that
+                is taken seriously rather than bolted on afterwards.
+            </p>
+            <p>
+                Everything on the site is real working code. The search really
+                queries MySQL, the cart really checks stock, and checkout
+                really writes a row into the <code>orders</code> table inside a
+                database transaction.
+            </p>
+        </div>
+
+        <div data-animate>
+            <h2>How it is built</h2>
+            <ul class="tick-list">
+                <li><span class="tick" aria-hidden="true">&#10003;</span>
+                    <strong>Backend</strong> - Python Flask with 27 routes</li>
+                <li><span class="tick" aria-hidden="true">&#10003;</span>
+                    <strong>Database</strong> - MySQL, 6 related tables</li>
+                <li><span class="tick" aria-hidden="true">&#10003;</span>
+                    <strong>Frontend</strong> - HTML5, CSS3 and vanilla
+                    JavaScript, no framework</li>
+                <li><span class="tick" aria-hidden="true">&#10003;</span>
+                    <strong>Security</strong> - hashed passwords, CSRF tokens,
+                    parameterised queries, admin authorisation</li>
+                <li><span class="tick" aria-hidden="true">&#10003;</span>
+                    <strong>Tests</strong> - 83 automated end-to-end checks</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+{# ---- Live numbers straight from the database ---- #}
+<section class="section section-alt">
+    <div class="container">
+        <div class="section-head section-head-center" data-animate>
+            <div>
+                <span class="section-eyebrow">Live numbers</span>
+                <h2>The shop right now</h2>
+            </div>
+        </div>
+
+        <div class="stat-strip">
+            <div class="stat-cell" data-animate>
+                <strong>{{ stats.products }}</strong>
+                <span>Products in stock</span>
+            </div>
+            <div class="stat-cell" data-animate style="--delay: 60ms">
+                <strong>{{ stats.categories }}</strong>
+                <span>Categories</span>
+            </div>
+            <div class="stat-cell" data-animate style="--delay: 120ms">
+                <strong>{{ stats.customers }}</strong>
+                <span>Registered customers</span>
+            </div>
+            <div class="stat-cell" data-animate style="--delay: 180ms">
+                <strong>{{ stats.orders }}</strong>
+                <span>Orders placed</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="cta-band" data-animate>
+            <div>
+                <h2>Want to see it working?</h2>
+                <p>Create an account and place a test order end to end.</p>
+            </div>
+            <div class="cta-band-actions">
+                <a href="{{ url_for('register') }}" class="btn btn-primary">Create Account</a>
+                <a href="{{ url_for('contact') }}" class="btn btn-ghost">Contact Us</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

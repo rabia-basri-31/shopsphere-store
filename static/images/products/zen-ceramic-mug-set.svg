@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800"
+     height="600" viewBox="0 0 800 600"
+     role="img" aria-label="Zen Ceramic Mug Set illustration">
+  <title>Zen Ceramic Mug Set</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#fb923c"/>
+      <stop offset="100%" stop-color="#c2410c"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg)"/>
+  <circle cx="655" cy="118" r="168" fill="#ffffff" opacity="0.09"/>
+  <circle cx="132" cy="512" r="132" fill="#ffffff" opacity="0.07"/>
+  <circle cx="400" cy="300" r="196" fill="#ffffff" opacity="0.10"/>
+  <g transform="translate(400 300)">
+    <g stroke="#ffffff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <path d="M-88 -74 h150 v108 a44 44 0 0 1 -44 44 h-62
+               a44 44 0 0 1 -44 -44 z"/>
+      <path d="M62 -52 h26 a34 34 0 0 1 0 68 h-26" opacity="0.75"/>
+      <line x1="-88" y1="-30" x2="62" y2="-30" opacity="0.5"/>
+      <path d="M-34 -134 c-14 14 14 24 0 38" opacity="0.6"/>
+      <path d="M6 -134 c-14 14 14 24 0 38" opacity="0.6"/>
+      <line x1="-88" y1="112" x2="62" y2="112" opacity="0.5"/>
+    </g>
+  </g>
+</svg>

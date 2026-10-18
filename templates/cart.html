@@ -1,0 +1,145 @@
+{# =====================================================================
+   templates/cart.html   -   SHOPPING CART
+   Shows every line, lets the user change the quantity, remove items,
+   and shows the subtotal + shipping + grand total.
+   ===================================================================== #}
+{% extends "base.html" %}
+{% from "macros.html" import empty_state with context %}
+
+{% block content %}
+
+<h1 class="page-title">Your Shopping Cart</h1>
+
+{% if not items %}
+    {# ---------- EMPTY CART (a normal state, not an error) -------- #}
+    {{ empty_state('Your cart is empty',
+                   'Browse our products and add something you like.',
+                   'Start Shopping',
+                   url_for('products')) }}
+
+{% else %}
+
+<div class="cart-layout">
+
+    {# ---------------- LEFT: THE CART LINES ------------------------ #}
+    <section class="cart-items">
+
+        <div class="cart-head-row">
+            <span>Product</span>
+            <span>Price</span>
+            <span>Quantity</span>
+            <span>Total</span>
+            <span></span>
+        </div>
+
+        {% for item in items %}
+            <div class="cart-row {% if item.is_out_of_stock %}row-warning{% endif %}">
+
+                {# Product image + name #}
+                <div class="cart-product">
+                    <img src="{{ product_image_url(item.image) }}"
+                         alt="{{ item.name }}" loading="lazy">
+                    <div>
+                        <a href="{{ url_for('product_details', slug=item.slug) }}"
+                           class="cart-name">{{ item.name }}</a>
+                        <span class="muted small">{{ item.category_name }}</span>
+
+                        {% if item.is_out_of_stock %}
+                            <span class="alert alert-warning small-alert">
+                                Only {{ item.stock }} in stock - please reduce the quantity.
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {# Unit price #}
+                <span class="cart-price">{{ item.price | money }}</span>
+
+                {# Quantity box: a small form posts to /cart/update #}
+                <form action="{{ url_for('cart_update') }}" method="post"
+                      class="cart-qty-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="item_id" value="{{ item.item_id }}">
+                    <input type="number" name="quantity" class="qty-input"
+                           value="{{ item.quantity }}" min="0"
+                           max="{{ item.stock if item.stock > 0 else 0 }}"
+                           data-qty-input>
+                    <button type="submit" class="btn btn-sm btn-outline">Update</button>
+                </form>
+
+                {# Line total #}
+                <strong class="cart-total">{{ item.line_total | money }}</strong>
+
+                {# Remove: separate small form with a JS confirm dialog #}
+                <form action="{{ url_for('cart_remove') }}" method="post"
+                      data-confirm="Remove '{{ item.name }}' from your cart?">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="item_id" value="{{ item.item_id }}">
+                    <button type="submit" class="btn btn-icon btn-danger"
+                            title="Remove item" aria-label="Remove item">&times;</button>
+                </form>
+            </div>
+        {% endfor %}
+
+        {# Cart level actions #}
+        <div class="cart-actions">
+            <a href="{{ url_for('products') }}" class="btn btn-ghost">&larr; Continue Shopping</a>
+
+            <form action="{{ url_for('cart_clear') }}" method="post"
+                  data-confirm="Remove ALL items from your cart?">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-outline btn-danger-outline">
+                    Empty Cart
+                </button>
+            </form>
+        </div>
+    </section>
+
+    {# ---------------- RIGHT: ORDER SUMMARY ------------------------ #}
+    <aside class="cart-summary">
+        <h2>Order Summary</h2>
+
+        <div class="summary-row">
+            <span>Subtotal ({{ items|length }} item{{ '' if items|length == 1 else 's' }})</span>
+            <span>{{ subtotal | money }}</span>
+        </div>
+
+        <div class="summary-row">
+            <span>Delivery</span>
+            <span>
+                {% if shipping == 0 %}
+                    <span class="free">FREE</span>
+                {% else %}
+                    {{ shipping | money }}
+                {% endif %}
+            </span>
+        </div>
+
+        {# Nudge the customer towards the free delivery limit #}
+        {% if shipping > 0 %}
+            {% set remaining = free_shipping_limit - subtotal %}
+            <p class="summary-hint">
+                Add {{ remaining | money }} more to get <strong>free delivery</strong>.
+            </p>
+        {% endif %}
+
+        <div class="summary-total">
+            <span>Total Amount</span>
+            <span>{{ total | money }}</span>
+        </div>
+
+        <a href="{{ url_for('checkout') }}" class="btn btn-primary btn-block btn-lg">
+            Proceed to Checkout
+        </a>
+
+        <ul class="summary-points">
+            <li>&#10003; Secure checkout (demo)</li>
+            <li>&#10003; Cash on delivery available</li>
+            <li>&#10003; No hidden charges</li>
+        </ul>
+    </aside>
+</div>
+
+{% endif %}
+
+{% endblock %}

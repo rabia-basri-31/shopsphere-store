@@ -1,0 +1,53 @@
+{# =====================================================================
+   templates/admin/_layout.html
+   A SECOND layout used by every admin page.
+
+   WHY A SEPARATE LAYOUT?
+     The admin panel has its own sidebar menu instead of the customer
+     navbar. `{% extends %}` lets us reuse base.html for the outer
+     HTML and add the admin sidebar around the content block.
+   ===================================================================== #}
+{% extends "base.html" %}
+
+{# ---- Admin sidebar menu ---- #}
+{% block content %}
+<div class="admin-layout">
+
+    <aside class="admin-sidebar">
+        <div class="admin-side-title">Admin Panel</div>
+
+        <nav class="admin-nav">
+            <a href="{{ url_for('admin_dashboard') }}"
+               class="{% if page_title == 'Admin Dashboard' %}active{% endif %}">
+                <span>&#128202;</span> Dashboard
+            </a>
+            <a href="{{ url_for('admin_products') }}"
+               class="{% if page_title == 'Manage Products' %}active{% endif %}">
+                <span>&#128230;</span> Products
+            </a>
+            <a href="{{ url_for('admin_add_product') }}"
+               class="{% if page_title == 'Add Product' %}active{% endif %}">
+                <span>&#10133;</span> Add Product
+            </a>
+            <a href="{{ url_for('admin_orders') }}"
+               class="{% if page_title == 'Orders' %}active{% endif %}">
+                <span>&#128230;</span> Orders
+            </a>
+            <a href="{{ url_for('admin_users') }}"
+               class="{% if page_title == 'Users' %}active{% endif %}">
+                <span>&#128101;</span> Users
+            </a>
+        </nav>
+
+        <div class="admin-side-foot">
+            <a href="{{ url_for('index') }}" class="btn btn-ghost btn-sm btn-block">
+                &#8592; Back to Shop
+            </a>
+        </div>
+    </aside>
+
+    {# The individual admin pages fill in this block. #}
+    {% block admin_content %}{% endblock %}
+
+</div>
+{% endblock %}

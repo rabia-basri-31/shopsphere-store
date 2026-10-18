@@ -1,0 +1,151 @@
+{# =====================================================================
+   templates/checkout.html   -   MOCK (DEMO) CHECKOUT
+
+   IMPORTANT: This is NOT a real payment page.
+   There is no payment gateway. We only collect the delivery address,
+   show the bill, and save the order in MySQL. This is exactly what a
+   "Cash on Delivery" order looks like.
+   ===================================================================== #}
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1 class="page-title">Checkout</h1>
+
+<div class="checkout-layout">
+
+    {# ---------------- LEFT: DELIVERY DETAILS --------------------- #}
+    <section class="checkout-form-panel">
+        <h2>Delivery Details</h2>
+
+        <form method="post" novalidate class="auth-form" id="checkoutForm">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="customer_name">Full name *</label>
+                    <input type="text" id="customer_name" name="customer_name"
+                           value="{{ form.customer_name }}" required maxlength="100"
+                           autocomplete="name">
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone number *</label>
+                    <input type="tel" id="phone" name="phone" value="{{ form.phone }}"
+                           required maxlength="10" pattern="[0-9]{10}"
+                           placeholder="10 digit mobile number"
+                           autocomplete="tel">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email address *</label>
+                <input type="email" id="email" name="email" value="{{ form.email }}"
+                       required autocomplete="email">
+            </div>
+
+            <div class="form-group">
+                <label for="address">Delivery address *</label>
+                <textarea id="address" name="address" rows="3" required
+                          minlength="10" maxlength="500"
+                          placeholder="House / flat number, street, area, landmark"
+                          autocomplete="street-address">{{ form.address }}</textarea>
+            </div>
+
+            <div class="form-row form-row-3">
+                <div class="form-group">
+                    <label for="city">City *</label>
+                    <input type="text" id="city" name="city" value="{{ form.city }}"
+                           required maxlength="80" autocomplete="address-level2">
+                </div>
+
+                <div class="form-group">
+                    <label for="state">State *</label>
+                    <input type="text" id="state" name="state" value="{{ form.state }}"
+                           required maxlength="80" autocomplete="address-level1">
+                </div>
+
+                <div class="form-group">
+                    <label for="pincode">PIN code *</label>
+                    <input type="text" id="pincode" name="pincode"
+                           value="{{ form.pincode }}" required maxlength="6"
+                           pattern="[0-9]{6}" placeholder="6 digits"
+                           autocomplete="postal-code">
+                </div>
+            </div>
+
+            {# ---- Payment method (demo only) ---- #}
+            <div class="form-group">
+                <label>Payment method</label>
+                <div class="payment-options">
+                    {% for method in payment_methods %}
+                        <label class="payment-option">
+                            <input type="radio" name="payment_method" value="{{ method }}"
+                                   {% if form.payment_method == method %}checked{% endif %}
+                                   required>
+                            <span>
+                                <strong>{{ method }}</strong>
+                                {% if 'Demo' in method %}
+                                    <small class="muted">Simulated - no real money changes hands</small>
+                                {% endif %}
+                            </span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg"
+                    data-validate-form>
+                Place Order &middot; {{ total | money }}
+            </button>
+
+            <p class="muted small center">
+                This is a demo store. No payment is processed and nothing is charged.
+            </p>
+        </form>
+    </section>
+
+    {# ---------------- RIGHT: BILL SUMMARY ------------------------ #}
+    <aside class="cart-summary">
+        <h2>Bill Summary</h2>
+
+        <div class="summary-items">
+            {% for item in items %}
+                <div class="summary-item">
+                    <img src="{{ product_image_url(item.image) }}" alt="{{ item.name }}">
+                    <div class="summary-item-info">
+                        <strong>{{ item.name }}</strong>
+                        <span class="muted small">
+                            {{ item.price | money }} &times; {{ item.quantity }}
+                        </span>
+                    </div>
+                    <span>{{ item.line_total | money }}</span>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="summary-row">
+            <span>Subtotal</span>
+            <span>{{ subtotal | money }}</span>
+        </div>
+
+        <div class="summary-row">
+            <span>Delivery</span>
+            <span>
+                {% if shipping == 0 %}<span class="free">FREE</span>
+                {% else %}{{ shipping | money }}{% endif %}
+            </span>
+        </div>
+
+        <div class="summary-total">
+            <span>Total Payable</span>
+            <span>{{ total | money }}</span>
+        </div>
+
+        <a href="{{ url_for('cart') }}" class="btn btn-ghost btn-block">
+            &larr; Back to Cart
+        </a>
+    </aside>
+</div>
+
+{% endblock %}

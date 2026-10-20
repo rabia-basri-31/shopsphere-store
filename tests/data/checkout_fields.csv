@@ -1,0 +1,21 @@
+id,field,value,should_pass,expected_message
+CH-V4a,phone,300123456,no,exactly 10 digits
+CH-V4b,phone,3001234567,yes,
+CH-V4c,phone,30012345678,no,exactly 10 digits
+CH-V4d,phone,30012abcde,no,exactly 10 digits
+CH-V5a,pincode,54000,no,exactly 6 digits
+CH-V5b,pincode,540000,yes,
+CH-V5c,pincode,5400001,no,exactly 6 digits
+CH-V5d,pincode,54000A,no,exactly 6 digits
+CH-V6a,address,House 123,no,full delivery address
+CH-V6b,address,House 1234,yes,
+CH-V7a,city,L,no,your city
+CH-V7b,city,Li,yes,
+CH-V7c,state,P,no,your state
+CH-V7d,state,Pb,yes,
+CH-V7e,customer_name,A,no,full name
+CH-V7f,customer_name,Al,yes,
+CH-V8,payment_method,Bitcoin,no,valid payment method
+CH-V8b,payment_method,UPI (Demo),yes,
+CH-V9a,email,not-an-email,no,valid email address
+CH-V9b,email,ali@@example.com,no,valid email address

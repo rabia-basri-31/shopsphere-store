@@ -1,0 +1,7 @@
+id,stock,quantity,expected
+CH-O3a,5,5,ok
+CH-O3b,4,5,none
+CH-O3c,1,1,ok
+CH-O3d,0,1,none
+CH-O3e,10,1,ok
+CH-O3f,1,2,none

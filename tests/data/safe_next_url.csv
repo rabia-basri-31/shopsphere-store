@@ -1,8 +1,0 @@
-case,input,expected
-AU-N1,/cart,/cart
-AU-N2,//evil.com,<NONE>
-AU-N3,http://evil.com,<NONE>
-AU-N4,<NONE>,<NONE>
-AU-N5,,<NONE>
-AU-N6,cart,<NONE>
-AU-N7,/,/

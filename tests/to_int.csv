@@ -1,0 +1,5 @@
+input,expected
+5,5
+-3,-3
+5.5,None
+abc,None

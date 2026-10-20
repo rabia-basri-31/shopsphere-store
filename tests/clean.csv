@@ -1,0 +1,5 @@
+input,max_length,expected
+hi,3,hi
+abcdef,3,abc
+abc,3,abc
+abcd,3,abc

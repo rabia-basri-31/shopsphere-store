@@ -1,0 +1,9 @@
+id,email,password,user_exists,is_admin,next,expected_type,expected
+AU-L1,ali@example.com,abc12345,yes,0,,redirect,/
+AU-L2,admin@example.com,abc12345,yes,1,,redirect,/admin
+AU-L3,ali@example.com,abc12345,yes,0,/cart,redirect,/cart
+AU-L4,ali@example.com,abc12345,yes,0,//evil.com,redirect,/
+AU-L5,ali@example.com,wrong999,yes,0,,message,Incorrect email or password.
+AU-L6,nobody@example.com,abc12345,no,0,,message,Incorrect email or password.
+AU-L7a,,abc12345,yes,0,,message,enter both
+AU-L7b,ali@example.com,,yes,0,,message,enter both

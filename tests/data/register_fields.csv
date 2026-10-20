@@ -1,0 +1,11 @@
+id,field,value,should_pass,expected_message
+AU-R2,name,A,no,full name
+AU-R3,name,Al,yes,
+AU-R4a,email,not-an-email,no,valid email address
+AU-R4b,email,a@b.c,no,valid email address
+AU-R5a,phone,123456789,no,exactly 10 digits
+AU-R5b,phone,12345678901,no,exactly 10 digits
+AU-R5c,phone,abcdefghij,no,exactly 10 digits
+AU-R5d,phone,3001234567,yes,
+AU-R6,phone,,yes,
+AU-R7,confirm_password,abc99999,no,do not match

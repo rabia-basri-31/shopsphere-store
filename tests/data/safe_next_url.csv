@@ -1,0 +1,7 @@
+id,input,expected
+AU-N1,/cart,/cart
+AU-N2,//evil.com,None
+AU-N3,http://evil.com,None
+AU-N5,,None
+AU-N6,cart,None
+AU-N7,/,/

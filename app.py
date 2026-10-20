@@ -33,6 +33,7 @@ from datetime import datetime
 from decimal import Decimal, InvalidOperation
 from functools import wraps
 
+
 from flask import (
     Flask,
     abort,
@@ -316,18 +317,33 @@ def to_int(value, default=None):
         return default
 
 
+
 def to_money(value):
     """
     Turn user input into a valid Decimal (money value).
     Returns None when the input is not a valid amount.
     """
+    if value is None:
+        return None
+
     try:
-        amount = Decimal(str(value).strip()).quantize(Decimal("0.01"))
+        amount = Decimal(str(value).strip())
+
+        # Reject NaN, Infinity and -Infinity
+        if not amount.is_finite():
+            return None
+
+        amount = amount.quantize(Decimal("0.01"))
+
     except (InvalidOperation, TypeError, ValueError):
         return None
+
     if amount < 0 or amount > Decimal("99999999.99"):
         return None
+
     return amount
+
+
 
 
 def slugify(text):

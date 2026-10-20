@@ -1,18 +1,16 @@
 
-# Module 3 - simple unit tests (run: pytest -v)
 
 import csv
 import sys
 import os
 from unittest.mock import patch
 
-# Add project root to Python path
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, PROJECT_ROOT)
 
 import app as shop
 
-# CSV files are stored inside tests/data/
+
 DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 
 
@@ -24,7 +22,6 @@ def read_csv(name):
         return list(csv.DictReader(f))
 
 
-# ---------------- to_money (data from CSV) ----------------
 
 def test_to_money_from_csv():
     for row in read_csv("to_money.csv"):
@@ -44,7 +41,6 @@ def test_to_money_nan():
     assert shop.to_money("NaN") is None
 
 
-# ---------------- to_int (data from CSV) ----------------
 
 def test_to_int_from_csv():
     for row in read_csv("to_int.csv"):
@@ -63,7 +59,7 @@ def test_to_int_none():
     assert shop.to_int(None) is None
 
 
-# ---------------- clean (data from CSV) ----------------
+
 
 def test_clean_from_csv():
     for row in read_csv("clean.csv"):
@@ -80,7 +76,7 @@ def test_clean_none():
     assert shop.clean(None) == ""
 
 
-# ---------------- slugify (data from CSV) ----------------
+
 
 def test_slugify_from_csv():
     for row in read_csv("slugify.csv"):
@@ -99,7 +95,6 @@ def test_slugify_none():
     assert shop.slugify(None) == "item"
 
 
-# ---------------- unique slug ----------------
 
 def test_unique_slug_free():
     with patch.object(shop, "query_one", side_effect=[None]):
@@ -125,8 +120,6 @@ def test_unique_slug_own_id():
             "Red Cup", ignore_id=1
         ) == "red-cup"
 
-
-# ---------------- products page ----------------
 
 def open_products(url, total=0):
     """Open a URL with a fake database."""
@@ -176,8 +169,6 @@ def test_products_sql_injection_text():
     response, data = open_products("/products?q=' OR 1=1 --")
     assert response.status_code == 200
 
-
-# ---------------- product details ----------------
 
 def open_details(slug, product):
     with patch.object(shop, "query_one", return_value=product), \

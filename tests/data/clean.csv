@@ -1,5 +1,8 @@
-input,max_length,expected
-hi,3,hi
-abcdef,3,abc
-abc,3,abc
-abcd,3,abc
+id,input,max_length,expected
+CL1,"  hello  ",0,hello
+CL2,hello world,5,hello
+CL3,hello,10,hello
+CL4,"  abc  ",3,abc
+CL5,abcdef,1,a
+CL6,,5,
+CL7,hello,0,hello

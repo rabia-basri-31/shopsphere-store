@@ -1,0 +1,9 @@
+id,input,expected
+TI1,5,5
+TI2,-3,-3
+TI3,abc,None
+TI4,3.5,None
+TI5,,None
+TI6,0,0
+TI7,007,7
+TI8," 7 ",7

@@ -1,5 +1,10 @@
-input,expected
-Nova X1 Smartphone,nova-x1-smartphone
-O'Brien,obrien
-Café,cafe
-اردو,item
+id,input,expected
+SL1,Nova X1 Smartphone,nova-x1-smartphone
+SL2,Hello World,hello-world
+SL3,A  B,a-b
+SL4,Café Latte,cafe-latte
+SL5,Rock & Roll!,rock-roll
+SL6,already-slugged,already-slugged
+SL7,!!!,item
+SL8,"  Trim Me  ",trim-me
+SL9,Under_score,under_score

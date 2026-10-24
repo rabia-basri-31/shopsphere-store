@@ -1,158 +1,78 @@
-import csv
-import os
-import sys
 from unittest.mock import patch
 from urllib.parse import unquote, urlparse
 
 import pytest
 from werkzeug.security import generate_password_hash
 
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, PROJECT_ROOT)
+from helpers import csv_cases
 
 import app as shop
 
-
-DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
-
-
-def read_csv(name):
-    file_path = os.path.join(DATA, name)
-
-    with open(file_path, newline="", encoding="utf-8") as f:
-        return list(csv.DictReader(f))
-
-
-def test_email_from_csv():
-    for row in read_csv("is_valid_email.csv"):
-        assert str(shop.is_valid_email(row["input"])) == row["expected"], row["id"]
-
-
-def test_email_typical():
-    assert shop.is_valid_email("user@example.com") is True
-
-
-def test_email_shortest_tld():
-    assert shop.is_valid_email("a@b.co") is True
-
-
-def test_email_one_letter_tld():
-    assert shop.is_valid_email("a@b.c") is False
-
-
-def test_email_no_at():
-    assert shop.is_valid_email("abc.example.com") is False
-
-
-def test_email_two_at():
-    assert shop.is_valid_email("a@@b.com") is False
-
-
-def test_email_space():
-    assert shop.is_valid_email("a b@c.com") is False
-
-
-def test_email_digits_in_tld():
-    assert shop.is_valid_email("a@b.c0m") is False
-
-
-def test_email_empty():
-    assert shop.is_valid_email("") is False
-
-
-def test_email_none():
-    assert shop.is_valid_email(None) is False
-
-
-def test_email_trailing_space():
-    assert shop.is_valid_email("a@b.com ") is False
-
-
-def test_password_from_csv():
-    for row in read_csv("password_problem.csv"):
-        result = shop.password_problem(row["input"])
-        if row["expected_contains"] == "":
-            assert result == "", row["id"]
-        else:
-            assert row["expected_contains"] in result, row["id"]
-
-
-def test_password_length_5():
-    assert "at least 6 characters" in shop.password_problem("abc12")
-
-
-def test_password_length_6():
-    assert shop.password_problem("abc123") == ""
-
-
-def test_password_length_72():
-    assert shop.password_problem("a" * 71 + "1") == ""
-
-
-def test_password_length_73():
-    assert "too long (maximum 72" in shop.password_problem("a" * 72 + "1")
-
-
-def test_password_letters_only():
-    assert "at least one number" in shop.password_problem("abcdef")
-
-
-def test_password_digits_only():
-    assert "at least one letter" in shop.password_problem("123456")
-
-
-def test_password_empty():
-    assert "at least 6 characters" in shop.password_problem("")
-
-
-def test_password_none():
-    assert "at least 6 characters" in shop.password_problem(None)
-
-
-def test_password_only_spaces():
-    assert "at least one letter" in shop.password_problem("      ")
-
-
-def test_password_unicode_letters():
-    assert shop.password_problem("پاسورڈ1") == ""
-
-
-def test_next_url_from_csv():
-    for row in read_csv("safe_next_url.csv"):
-        assert str(shop.safe_next_url(row["input"])) == row["expected"], row["id"]
-
-
-def test_next_url_relative():
-    assert shop.safe_next_url("/cart") == "/cart"
-
-
-def test_next_url_protocol_relative():
-    assert shop.safe_next_url("//evil.com") is None
-
-
-def test_next_url_absolute():
-    assert shop.safe_next_url("http://evil.com") is None
-
-
-def test_next_url_none():
-    assert shop.safe_next_url(None) is None
-
-
-def test_next_url_empty():
-    assert shop.safe_next_url("") is None
-
-
-def test_next_url_no_leading_slash():
-    assert shop.safe_next_url("cart") is None
-
-
-def test_next_url_root():
-    assert shop.safe_next_url("/") == "/"
-
-
-@pytest.mark.xfail(reason="open redirect: /\\evil.com is returned unchanged")
-def test_next_url_backslash():
-    assert shop.safe_next_url("/\\evil.com") is None
+pytestmark = pytest.mark.m1
+
+
+def check_password(value, expected):
+    result = shop.password_problem(value)
+    if expected:
+        assert expected in result
+    else:
+        assert result == ""
+
+
+@pytest.mark.unit
+@pytest.mark.boundary
+class TestIsValidEmail:
+
+    @pytest.mark.parametrize(
+        "value,expected", csv_cases("is_valid_email.csv", "input", "expected")
+    )
+    def test_from_csv(self, value, expected):
+        assert shop.is_valid_email(value) is (expected == "True")
+
+    def test_none(self):
+        assert shop.is_valid_email(None) is False
+
+
+@pytest.mark.unit
+@pytest.mark.boundary
+class TestPasswordProblem:
+
+    @pytest.mark.parametrize(
+        "value,expected",
+        csv_cases("password_problem.csv", "input", "expected_contains"),
+    )
+    def test_from_csv(self, value, expected):
+        check_password(value, expected)
+
+    @pytest.mark.parametrize(
+        "value,expected",
+        [
+            pytest.param("a" * 71 + "1", "", id="AU-P3"),
+            pytest.param("a" * 72 + "1", "too long (maximum 72", id="AU-P4"),
+            pytest.param(None, "at least 6 characters", id="AU-P8"),
+        ],
+    )
+    def test_inline_cases(self, value, expected):
+        check_password(value, expected)
+
+
+@pytest.mark.unit
+@pytest.mark.security
+class TestSafeNextUrl:
+
+    @pytest.mark.parametrize(
+        "value,expected", csv_cases("safe_next_url.csv", "input", "expected")
+    )
+    def test_from_csv(self, value, expected):
+        expected = None if expected == "None" else expected
+        assert shop.safe_next_url(value) == expected
+
+    def test_none(self):
+        assert shop.safe_next_url(None) is None
+
+    @pytest.mark.xfail(reason="open redirect: /\\evil.com is returned unchanged")
+    def test_backslash_prefix(self):
+        assert shop.safe_next_url("/\\evil.com") is None
 
 
 VALID_REGISTER = {
@@ -187,94 +107,64 @@ def post_register(changes=None, duplicate=False, send_token=True):
     return response, fake_execute, messages
 
 
-def test_register_all_valid():
-    response, fake_execute, messages = post_register()
-    assert response.status_code == 302
-    assert urlparse(response.headers["Location"]).path == "/login"
-    assert any("Account created!" in m for m in messages)
-    fake_execute.assert_called_once()
+@pytest.mark.route
+class TestRegister:
 
+    @pytest.mark.smoke
+    @pytest.mark.priority(1)
+    def test_all_valid(self):
+        response, fake_execute, messages = post_register()
+        assert response.status_code == 302
+        assert urlparse(response.headers["Location"]).path == "/login"
+        assert any("Account created!" in m for m in messages)
+        fake_execute.assert_called_once()
 
-def test_register_fields_from_csv():
-    for row in read_csv("register_fields.csv"):
-        response, fake_execute, messages = post_register({row["field"]: row["value"]})
+    @pytest.mark.parametrize(
+        "field,value,should_pass,message",
+        csv_cases(
+            "register_fields.csv", "field", "value", "should_pass", "expected_message"
+        ),
+    )
+    def test_field_rules(self, field, value, should_pass, message):
+        response, fake_execute, messages = post_register({field: value})
 
-        if row["should_pass"] == "yes":
-            assert response.status_code == 302, row["id"]
+        if should_pass == "yes":
+            assert response.status_code == 302
             fake_execute.assert_called_once()
         else:
-            assert response.status_code == 200, row["id"]
+            assert response.status_code == 200
             fake_execute.assert_not_called()
-            assert any(row["expected_message"] in m for m in messages), row["id"]
+            assert any(message in m for m in messages)
+
+    def test_phone_empty_stored_as_none(self):
+        response, fake_execute, messages = post_register({"phone": ""})
+        assert response.status_code == 302
+        assert fake_execute.call_args.args[1][3] is None
+
+    def test_duplicate_email(self):
+        response, fake_execute, messages = post_register(duplicate=True)
+        assert any("already exists" in m for m in messages)
+        fake_execute.assert_not_called()
+
+    def test_email_saved_lowercase(self):
+        response, fake_execute, messages = post_register({"email": "ALI@EXAMPLE.COM"})
+        assert response.status_code == 302
+        assert fake_execute.call_args.args[1][1] == "ali@example.com"
 
 
-def test_register_name_one_char():
-    response, fake_execute, messages = post_register({"name": "A"})
-    assert any("full name (at least 2" in m for m in messages)
-    fake_execute.assert_not_called()
+@pytest.mark.route
+@pytest.mark.security
+class TestRegisterSecurity:
 
+    def test_password_is_hashed(self):
+        response, fake_execute, messages = post_register()
+        saved_password = fake_execute.call_args.args[1][2]
+        assert saved_password != "abc12345"
 
-def test_register_name_two_chars():
-    response, fake_execute, messages = post_register({"name": "Al"})
-    assert response.status_code == 302
-    fake_execute.assert_called_once()
-
-
-def test_register_invalid_email():
-    response, fake_execute, messages = post_register({"email": "bad"})
-    assert any("valid email address" in m for m in messages)
-    fake_execute.assert_not_called()
-
-
-def test_register_phone_9_digits():
-    response, fake_execute, messages = post_register({"phone": "123456789"})
-    assert any("exactly 10 digits" in m for m in messages)
-
-
-def test_register_phone_11_digits():
-    response, fake_execute, messages = post_register({"phone": "12345678901"})
-    assert any("exactly 10 digits" in m for m in messages)
-
-
-def test_register_phone_letters():
-    response, fake_execute, messages = post_register({"phone": "abcdefghij"})
-    assert any("exactly 10 digits" in m for m in messages)
-
-
-def test_register_phone_empty_stored_as_none():
-    response, fake_execute, messages = post_register({"phone": ""})
-    assert response.status_code == 302
-    assert fake_execute.call_args.args[1][3] is None
-
-
-def test_register_password_mismatch():
-    response, fake_execute, messages = post_register({"confirm_password": "different1"})
-    assert any("do not match" in m for m in messages)
-    fake_execute.assert_not_called()
-
-
-def test_register_duplicate_email():
-    response, fake_execute, messages = post_register(duplicate=True)
-    assert any("already exists" in m for m in messages)
-    fake_execute.assert_not_called()
-
-
-def test_register_email_saved_lowercase():
-    response, fake_execute, messages = post_register({"email": "ALI@EXAMPLE.COM"})
-    assert response.status_code == 302
-    assert fake_execute.call_args.args[1][1] == "ali@example.com"
-
-
-def test_register_password_is_hashed():
-    response, fake_execute, messages = post_register()
-    saved_password = fake_execute.call_args.args[1][2]
-    assert saved_password != "abc12345"
-
-
-def test_register_missing_csrf():
-    response, fake_execute, messages = post_register(send_token=False)
-    assert response.status_code == 400
-    fake_execute.assert_not_called()
+    def test_missing_csrf(self):
+        response, fake_execute, messages = post_register(send_token=False)
+        assert response.status_code == 400
+        fake_execute.assert_not_called()
 
 
 PASSWORD_HASH = generate_password_hash("abc12345")
@@ -322,118 +212,105 @@ def post_login(email, password, user, next_value=""):
     return response, messages, user_id
 
 
-def test_login_from_csv():
-    for row in read_csv("login_cases.csv"):
-        user = None if row["user_exists"] == "no" else make_user(int(row["is_admin"]))
-        response, messages, user_id = post_login(
-            row["email"], row["password"], user, row["next"]
-        )
+@pytest.mark.route
+class TestLogin:
 
-        if row["expected_type"] == "redirect":
-            assert response.status_code == 302, row["id"]
-            assert urlparse(response.headers["Location"]).path == row["expected"], row["id"]
-            assert user_id == 1, row["id"]
+    @pytest.mark.parametrize(
+        "email,password,user_exists,is_admin,next_value,expected_type,expected",
+        csv_cases(
+            "login_cases.csv",
+            "email",
+            "password",
+            "user_exists",
+            "is_admin",
+            "next",
+            "expected_type",
+            "expected",
+        ),
+    )
+    def test_decision_table(
+        self, email, password, user_exists, is_admin, next_value, expected_type, expected
+    ):
+        user = None if user_exists == "no" else make_user(int(is_admin))
+        response, messages, user_id = post_login(email, password, user, next_value)
+
+        if expected_type == "redirect":
+            location = response.headers["Location"]
+            assert response.status_code == 302
+            assert urlparse(location).path == expected
+            assert "evil.com" not in location
+            assert user_id == 1
         else:
-            assert response.status_code == 200, row["id"]
-            assert any(row["expected"] in m for m in messages), row["id"]
-            assert user_id is None, row["id"]
+            assert response.status_code == 200
+            assert any(expected in m for m in messages)
+            assert user_id is None
+
+    @pytest.mark.smoke
+    @pytest.mark.priority(1)
+    def test_valid_customer(self):
+        response, messages, user_id = post_login(
+            "ali@example.com", "abc12345", make_user(0)
+        )
+        assert user_id == 1
+        assert urlparse(response.headers["Location"]).path == "/"
+
+    def test_already_logged_in(self):
+        with patch.object(shop, "get_current_user", return_value=LOGGED_IN_USER):
+            response = shop.app.test_client().get("/login")
+        assert response.status_code == 302
+        assert urlparse(response.headers["Location"]).path == "/"
 
 
-def test_login_valid_customer():
-    response, messages, user_id = post_login("ali@example.com", "abc12345", make_user(0))
-    assert user_id == 1
-    assert urlparse(response.headers["Location"]).path == "/"
+@pytest.mark.route
+class TestLogout:
+
+    def test_logged_in(self):
+        with patch.object(shop, "get_current_user", return_value=LOGGED_IN_USER), \
+             patch.object(shop, "flash") as fake_flash:
+            client = shop.app.test_client()
+            with client.session_transaction() as sess:
+                sess["user_id"] = 1
+            response = client.get("/logout")
+            with client.session_transaction() as sess:
+                remaining = sess.get("user_id")
+
+        messages = [call.args[0] for call in fake_flash.call_args_list]
+        assert response.status_code == 302
+        assert remaining is None
+        assert any("logged out" in m for m in messages)
+
+    def test_guest(self):
+        with patch.object(shop, "get_current_user", return_value=None), \
+             patch.object(shop, "flash") as fake_flash:
+            response = shop.app.test_client().get("/logout")
+
+        assert response.status_code == 302
+        assert urlparse(response.headers["Location"]).path == "/"
+        fake_flash.assert_not_called()
 
 
-def test_login_valid_admin():
-    response, messages, user_id = post_login("ali@example.com", "abc12345", make_user(1))
-    assert urlparse(response.headers["Location"]).path == "/admin"
+@pytest.mark.route
+@pytest.mark.security
+class TestAccessControl:
 
+    def test_same_message_for_unknown_email(self):
+        _, wrong_password, _ = post_login("ali@example.com", "wrong999", make_user(0))
+        _, unknown_email, _ = post_login("nobody@example.com", "abc12345", None)
+        assert wrong_password == unknown_email
 
-def test_login_with_next():
-    response, messages, user_id = post_login(
-        "ali@example.com", "abc12345", make_user(0), "/cart"
-    )
-    assert urlparse(response.headers["Location"]).path == "/cart"
+    def test_login_required_redirects_guest(self):
+        with patch.object(shop, "get_current_user", return_value=None), \
+             patch.object(shop, "flash"):
+            response = shop.app.test_client().get("/cart")
 
+        location = response.headers["Location"]
+        assert response.status_code == 302
+        assert urlparse(location).path == "/login"
+        assert "next=/cart" in unquote(location)
 
-def test_login_with_evil_next():
-    response, messages, user_id = post_login(
-        "ali@example.com", "abc12345", make_user(0), "//evil.com"
-    )
-    assert urlparse(response.headers["Location"]).path == "/"
-    assert "evil.com" not in response.headers["Location"]
+    def test_admin_required_blocks_customer(self):
+        with patch.object(shop, "get_current_user", return_value=LOGGED_IN_USER), \
+             patch.object(shop, "render_template", return_value="ok"):
+            response = shop.app.test_client().get("/admin")
 
-
-def test_login_wrong_password():
-    response, messages, user_id = post_login("ali@example.com", "wrong999", make_user(0))
-    assert "Incorrect email or password." in messages
-    assert user_id is None
-
-
-def test_login_unknown_email_same_message():
-    _, wrong_password_messages, _ = post_login("ali@example.com", "wrong999", make_user(0))
-    _, unknown_email_messages, _ = post_login("nobody@example.com", "abc12345", None)
-    assert wrong_password_messages == unknown_email_messages
-
-
-def test_login_empty_email():
-    response, messages, user_id = post_login("", "abc12345", make_user(0))
-    assert any("enter both" in m for m in messages)
-
-
-def test_login_empty_password():
-    response, messages, user_id = post_login("ali@example.com", "", make_user(0))
-    assert any("enter both" in m for m in messages)
-
-
-def test_login_already_logged_in():
-    with patch.object(shop, "get_current_user", return_value=LOGGED_IN_USER):
-        response = shop.app.test_client().get("/login")
-    assert response.status_code == 302
-    assert urlparse(response.headers["Location"]).path == "/"
-
-
-def test_logout_logged_in():
-    with patch.object(shop, "get_current_user", return_value=LOGGED_IN_USER), \
-         patch.object(shop, "flash") as fake_flash:
-        client = shop.app.test_client()
-        with client.session_transaction() as sess:
-            sess["user_id"] = 1
-        response = client.get("/logout")
-        with client.session_transaction() as sess:
-            remaining = sess.get("user_id")
-
-    messages = [call.args[0] for call in fake_flash.call_args_list]
-    assert response.status_code == 302
-    assert remaining is None
-    assert any("logged out" in m for m in messages)
-
-
-def test_logout_guest():
-    with patch.object(shop, "get_current_user", return_value=None), \
-         patch.object(shop, "flash") as fake_flash:
-        response = shop.app.test_client().get("/logout")
-
-    assert response.status_code == 302
-    assert urlparse(response.headers["Location"]).path == "/"
-    fake_flash.assert_not_called()
-
-
-def test_login_required_guest_redirected():
-    with patch.object(shop, "get_current_user", return_value=None), \
-         patch.object(shop, "flash"):
-        response = shop.app.test_client().get("/cart")
-
-    location = response.headers["Location"]
-    assert response.status_code == 302
-    assert urlparse(location).path == "/login"
-    assert "next=/cart" in unquote(location)
-
-
-def test_admin_required_customer_blocked():
-    with patch.object(shop, "get_current_user", return_value=LOGGED_IN_USER), \
-         patch.object(shop, "render_template", return_value="ok"):
-        response = shop.app.test_client().get("/admin")
-
-    assert response.status_code == 403
+        assert response.status_code == 403
